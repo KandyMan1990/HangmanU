@@ -6,6 +6,9 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    //TODO: shuffle list at beginning and pop off first index instead of using random every word
+    //cleanup this script (look over every line)
+    //why is dont destroy on load commented out???
     static GameManager instance;
 
     public static GameManager Instance
@@ -17,7 +20,6 @@ public class GameManager : MonoBehaviour
                 instance = (GameManager)FindObjectOfType(typeof(GameManager));
                 if (instance == null)
                 {
-                    //Try loading a template prefab
                     GameObject templatePrefab = Resources.Load("GameManager") as GameObject;
 
                     GameObject GM;
@@ -27,9 +29,8 @@ public class GameManager : MonoBehaviour
                     }
                     else
                     {
-                        //Create a new one in hierarchy, and this one will persist throughout the game/scene too.
                         GM = new GameObject("Game Manager");
-                        GM.AddComponent<GameManager>(); //This point Awake will be called
+                        GM.AddComponent<GameManager>();
                     }
 
                     instance = GM.GetComponent<GameManager>();
@@ -41,13 +42,11 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        //Check for duplicates in the scene
         Object[] GMs = FindObjectsOfType(typeof(GameManager));
         for (int i = 0; i < GMs.Length; i++)
         {
             if (GMs[i] != this)
-            { //Not conform to singleton pattern
-              //Self destruct!
+            {
                 Destroy(gameObject);
             }
         }
@@ -136,7 +135,7 @@ public class GameManager : MonoBehaviour
 
     void UpdateUI()
     {
-        //update hangman image
+        GUI.image.sprite = (Sprite)Resources.Load(livesRemaining.ToString(), typeof(Sprite));
         LivesUI.text = LIVES_REMAINING + livesRemaining.ToString();
         ScoreUI.text = SCORE + score.ToString();
     }
@@ -182,7 +181,6 @@ public class GameManager : MonoBehaviour
             {
                 livesRemaining -= 1;
                 score -= 10;
-                GUI.image.sprite = (Sprite)Resources.Load(livesRemaining.ToString(), typeof(Sprite));
                 SFXManager.Instance.PlaySFX(IncorrectInput);
                 UpdateUI();
             }
