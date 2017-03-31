@@ -4,16 +4,15 @@ using UnityEngine.SceneManagement;
 
 public class WordOver : MonoBehaviour
 {
-    public Text State;
-    public Text Word;
-    public Image image;
+    [SerializeField] Text State;
+    [SerializeField] Text Word;
+    [SerializeField] Image image;
 
-    // Use this for initialization
     void Start()
     {
         Word.text = "The word was: " + GameManager.Instance.CurrentWord;
 
-        if (GameManager.Instance.LivesRemaining > 0)
+        if (GameManager.Instance.CurrentRoundScore > 0)
         {
             State.text = "Congratulations!";
             image.enabled = false;

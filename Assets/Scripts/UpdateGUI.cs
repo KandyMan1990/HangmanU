@@ -10,14 +10,14 @@ public class UpdateGUI : MonoBehaviour
     [SerializeField] Image image;
     [SerializeField] List<Button> Buttons;
 
+    const string CURRENT_ROUND_SCORE = "Score for this word: ";
+    const string SCORE = "Score: ";
+
     void Start()
     {
-        Lives.text += GameManager.Instance.LivesRemaining.ToString();
+        Lives.text += GameManager.Instance.CurrentRoundScore.ToString();
         Score.text += GameManager.Instance.Score.ToString();
     }
-
-    const string LIVES_REMAINING = "Score for this word: ";
-    const string SCORE = "Score: ";
 
     public void EnableButtons(bool enabled)
     {
@@ -41,9 +41,9 @@ public class UpdateGUI : MonoBehaviour
         }
     }
 
-    public void Reset(char[] newWord, int livesRemaining)
+    public void Reset(char[] newWord, int currentRoundScore)
     {
-        image.sprite = (Sprite)Resources.Load(livesRemaining.ToString(), typeof(Sprite));
+        image.sprite = (Sprite)Resources.Load(currentRoundScore.ToString(), typeof(Sprite));
 
         SetUpWord(newWord);
     }
@@ -61,10 +61,10 @@ public class UpdateGUI : MonoBehaviour
         }
     }
 
-    public void UpdateUI(int livesRemaining, int score)
+    public void UpdateUI(int currentRoundScore, int score)
     {
-        image.sprite = (Sprite)Resources.Load(livesRemaining.ToString(), typeof(Sprite));
-        Lives.text = LIVES_REMAINING + (livesRemaining * 10).ToString();
+        image.sprite = (Sprite)Resources.Load(currentRoundScore.ToString(), typeof(Sprite));
+        Lives.text = CURRENT_ROUND_SCORE + (currentRoundScore).ToString();
         Score.text = SCORE + score.ToString();
     }
 

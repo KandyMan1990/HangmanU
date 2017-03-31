@@ -7,7 +7,6 @@ public class GameManager : MonoBehaviour
 {
     //TODO: shuffle list at beginning and pop off first index instead of using random every word
     //cleanup this script (look over every line)
-    //why is dont destroy on load commented out???
     static GameManager instance;
 
     public static GameManager Instance
@@ -49,26 +48,24 @@ public class GameManager : MonoBehaviour
                 Destroy(gameObject);
             }
         }
-
-        //DontDestroyOnLoad(gameObject);
     }
 
-    int livesRemaining;
+    int currentRoundScore;
     int score;
-    [SerializeField]
     string currentWord;
     List<string> usedKeys = new List<string>();
     bool canCheckState = true;
 
-    public int LivesRemaining
+    public int CurrentRoundScore
     {
-        get { return livesRemaining; }
+        get { return currentRoundScore; }
     }
     public int Score
     {
         get { return score; }
     }
     public string CurrentWord { get; private set; }
+
     public AudioClip CorrectInput;
     public AudioClip IncorrectInput;
     public AudioClip CorrectAnswer;
@@ -82,7 +79,6 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     List<string> availableWords = new List<string>();
 
-    // Use this for initialization
     void Start()
     {
         availableWords.AddRange(words);
@@ -94,8 +90,7 @@ public class GameManager : MonoBehaviour
 
     void Reset()
     {
-        livesRemaining = 10;
-        score += 100;
+        currentRoundScore = 100;
 
         if (availableWords.Count > 0)
         {
@@ -106,13 +101,13 @@ public class GameManager : MonoBehaviour
 
             char[] characters = currentWord.ToCharArray();
 
-            GUI.Reset(characters, livesRemaining);
+            GUI.Reset(characters, currentRoundScore);
 
             canCheckState = true;
             GUI.EnableButtons(true);
             usedKeys.Clear();
             usedKeys.TrimExcess();
-            GUI.UpdateUI(livesRemaining, score);
+            GUI.UpdateUI(currentRoundScore, score);
         }
     }
 
@@ -161,10 +156,9 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                livesRemaining -= 1;
-                score -= 10;
+                currentRoundScore -= 10;
                 SFXManager.Instance.PlaySFX(IncorrectInput);
-                GUI.UpdateUI(livesRemaining, score);
+                GUI.UpdateUI(currentRoundScore, score);
             }
 
             CheckPlayerState();
@@ -284,7 +278,7 @@ public class GameManager : MonoBehaviour
 
     void CheckPlayerState()
     {
-        if (livesRemaining <= 0)
+        if (currentRoundScore <= 0)
         {
             if (score > 0)
                 HighScores.AddToList(score);
@@ -306,7 +300,7 @@ public class GameManager : MonoBehaviour
 
                 CurrentWord = currentWord;
                 SceneManager.LoadSceneAsync("FinishedWord", LoadSceneMode.Additive);
-
+                score += currentRoundScore;
                 Invoke("Reset", 2.9f);
             }
         }
@@ -318,6 +312,7 @@ public class GameManager : MonoBehaviour
 
     void WonGame()
     {
+        score += currentRoundScore;
         HighScores.AddToList(score);
 
         if (CorrectAnswer)
