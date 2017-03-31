@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.UI;
 using System.Linq;
 using UnityEngine.SceneManagement;
 
@@ -54,9 +53,6 @@ public class GameManager : MonoBehaviour
         //DontDestroyOnLoad(gameObject);
     }
 
-    const string LIVES_REMAINING = "Lives Remaining: ";
-    const string SCORE = "Score: ";
-
     int livesRemaining;
     int score;
     [SerializeField]
@@ -78,9 +74,6 @@ public class GameManager : MonoBehaviour
     public AudioClip CorrectAnswer;
     public AudioClip LostGame;
     public AudioClip WinGame;
-    Text LivesUI;
-    Text ScoreUI;
-    Text WordUI;
     UpdateGUI GUI;
 
     [SerializeField]
@@ -95,9 +88,6 @@ public class GameManager : MonoBehaviour
         availableWords.AddRange(words);
 
         GUI = FindObjectOfType(typeof(UpdateGUI)) as UpdateGUI;
-        LivesUI = GameObject.Find("UIManager").GetComponent<UpdateGUI>().Lives;
-        ScoreUI = GameObject.Find("UIManager").GetComponent<UpdateGUI>().Score;
-        WordUI = GameObject.Find("UIManager").GetComponent<UpdateGUI>().Word;
         score = 0;
         Reset();
     }
@@ -116,28 +106,15 @@ public class GameManager : MonoBehaviour
 
 
             char[] characters = currentWord.ToCharArray();
-            WordUI.text = string.Empty;
-            foreach (char c in characters)
-            {
-                if (char.IsWhiteSpace(c))
-                    WordUI.text += c;
-                else
-                    WordUI.text += '_';
-            }
+
+            GUI.Reset(characters);
 
             canCheckState = true;
             GUI.EnableButtons(true);
             usedKeys.Clear();
             usedKeys.TrimExcess();
-            UpdateUI();
+            GUI.UpdateUI(livesRemaining, score);
         }
-    }
-
-    void UpdateUI()
-    {
-        GUI.image.sprite = (Sprite)Resources.Load(livesRemaining.ToString(), typeof(Sprite));
-        LivesUI.text = LIVES_REMAINING + livesRemaining.ToString();
-        ScoreUI.text = SCORE + score.ToString();
     }
 
     public void ClickedInput(char btnInput)
@@ -163,7 +140,7 @@ public class GameManager : MonoBehaviour
             if (currentWord.Contains(letter))
             {
                 char[] letters = currentWord.ToCharArray();
-                char[] displayWord = WordUI.text.ToCharArray();
+                char[] displayWord = GUI.GetWordAsCharArray();
 
                 for (int i = 0; i < letters.Length; i++)
                 {
@@ -172,9 +149,15 @@ public class GameManager : MonoBehaviour
                         displayWord[i] = letter;
                     }
                 }
-                WordUI.text = string.Empty;
+                string wordUI_Text = string.Empty;
+
                 foreach (char ch in displayWord)
-                    WordUI.text += ch;
+                {
+                    wordUI_Text += ch;
+                }
+
+                GUI.SetWordText(wordUI_Text);
+
                 SFXManager.Instance.PlaySFX(CorrectInput);
             }
             else
@@ -182,7 +165,7 @@ public class GameManager : MonoBehaviour
                 livesRemaining -= 1;
                 score -= 10;
                 SFXManager.Instance.PlaySFX(IncorrectInput);
-                UpdateUI();
+                GUI.UpdateUI(livesRemaining, score);
             }
 
             CheckPlayerState();
@@ -313,7 +296,7 @@ public class GameManager : MonoBehaviour
             CurrentWord = currentWord;
             SceneManager.LoadSceneAsync("FinishedWord", LoadSceneMode.Additive);
         }
-        else if (!WordUI.text.Contains("_"))
+        else if (!GUI.GetWord().Contains("_"))
         {
             if (availableWords.Count <= 0)
                 WonGame();
