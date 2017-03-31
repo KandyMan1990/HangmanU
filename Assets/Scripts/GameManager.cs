@@ -6,8 +6,22 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     //TODO: shuffle list at beginning and pop off first index instead of using random every word
-    //cleanup this script (look over every line)
     static GameManager instance;
+
+    [SerializeField] AudioClip CorrectInput;
+    [SerializeField] AudioClip IncorrectInput;
+    [SerializeField] AudioClip CorrectAnswer;
+    [SerializeField] AudioClip LostGame;
+    [SerializeField] AudioClip WinGame;
+    [SerializeField] string[] words;
+    [SerializeField] List<string> availableWords = new List<string>();
+
+    int currentRoundScore;
+    int score;
+    string currentWord;
+    List<string> usedKeys = new List<string>();
+    bool canCheckState = true;
+    UpdateGUI GUI;
 
     public static GameManager Instance
     {
@@ -37,6 +51,15 @@ public class GameManager : MonoBehaviour
             return instance;
         }
     }
+    public int CurrentRoundScore
+    {
+        get { return currentRoundScore; }
+    }
+    public int Score
+    {
+        get { return score; }
+    }
+    public string CurrentWord { get; private set; }
 
     void Awake()
     {
@@ -49,36 +72,7 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
-    int currentRoundScore;
-    int score;
-    string currentWord;
-    List<string> usedKeys = new List<string>();
-    bool canCheckState = true;
-
-    public int CurrentRoundScore
-    {
-        get { return currentRoundScore; }
-    }
-    public int Score
-    {
-        get { return score; }
-    }
-    public string CurrentWord { get; private set; }
-
-    public AudioClip CorrectInput;
-    public AudioClip IncorrectInput;
-    public AudioClip CorrectAnswer;
-    public AudioClip LostGame;
-    public AudioClip WinGame;
-    UpdateGUI GUI;
-
-    [SerializeField]
-    string[] words;
-
-    [SerializeField]
-    List<string> availableWords = new List<string>();
-
+    
     void Start()
     {
         availableWords.AddRange(words);
@@ -90,14 +84,13 @@ public class GameManager : MonoBehaviour
 
     void Reset()
     {
-        currentRoundScore = 100;
-
         if (availableWords.Count > 0)
         {
+            currentRoundScore = 100;
+
             int i = Random.Range(0, availableWords.Count);
             currentWord = availableWords[i];
             availableWords.RemoveAt(i);
-
 
             char[] characters = currentWord.ToCharArray();
 
