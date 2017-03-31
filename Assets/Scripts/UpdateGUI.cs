@@ -4,12 +4,17 @@ using UnityEngine.UI;
 
 public class UpdateGUI : MonoBehaviour
 {
-    public Text Lives;
-    public Text Score;
-    public Text Word;
-    public Image image;
+    [SerializeField] Text Lives;
+    [SerializeField] Text Score;
+    [SerializeField] Text Word;
+    [SerializeField] Image image;
+    [SerializeField] List<Button> Buttons;
 
-    public List<Button> Buttons;
+    void Start()
+    {
+        Lives.text += GameManager.Instance.LivesRemaining.ToString();
+        Score.text += GameManager.Instance.Score.ToString();
+    }
 
     const string LIVES_REMAINING = "Score for this word: ";
     const string SCORE = "Score: ";
@@ -36,14 +41,10 @@ public class UpdateGUI : MonoBehaviour
         }
     }
 
-    void Start()
+    public void Reset(char[] newWord, int livesRemaining)
     {
-        Lives.text += GameManager.Instance.LivesRemaining.ToString();
-        Score.text += GameManager.Instance.Score.ToString();
-    }
+        image.sprite = (Sprite)Resources.Load(livesRemaining.ToString(), typeof(Sprite));
 
-    public void Reset(char[] newWord)
-    {
         SetUpWord(newWord);
     }
 

@@ -96,7 +96,6 @@ public class GameManager : MonoBehaviour
     {
         livesRemaining = 10;
         score += 100;
-        GUI.image.sprite = (Sprite)Resources.Load(livesRemaining.ToString(), typeof(Sprite));
 
         if (availableWords.Count > 0)
         {
@@ -107,7 +106,7 @@ public class GameManager : MonoBehaviour
 
             char[] characters = currentWord.ToCharArray();
 
-            GUI.Reset(characters);
+            GUI.Reset(characters, livesRemaining);
 
             canCheckState = true;
             GUI.EnableButtons(true);
