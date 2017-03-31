@@ -4,9 +4,17 @@ using UnityEditor;
 [CustomEditor(typeof(WordDatabase))]
 public class WordDatabaseEditor : Editor
 {
+    WordDatabase myTarget;
+
     public override void OnInspectorGUI()
     {
-        WordDatabase myTarget = (WordDatabase)target;
+        myTarget = (WordDatabase)target;
+
+        EditorGUILayout.BeginVertical("Box");
+        EditorGUILayout.LabelField(myTarget.Count.ToString() + " word(s) in the database");
+        EditorGUILayout.EndVertical();
+
+        EditorGUILayout.Space();
 
         if (myTarget.Count > 0)
         {
@@ -31,5 +39,10 @@ public class WordDatabaseEditor : Editor
         {
             myTarget.AddWord();
         }
+    }
+
+    void OnDisable()
+    {
+        EditorUtility.SetDirty(myTarget);
     }
 }
