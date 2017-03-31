@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    //TODO: shuffle list at beginning and pop off first index instead of using random every word
     static GameManager instance;
 
     [SerializeField] AudioClip CorrectInput;
