@@ -316,7 +316,6 @@ public class GameManager : MonoBehaviour
                 SceneManager.LoadSceneAsync("FinishedWord", LoadSceneMode.Additive);
                 score += currentRoundScore;
                 Invoke("Reset", 2.9f);
-                gameInProgress = false;
             }
         }
         else

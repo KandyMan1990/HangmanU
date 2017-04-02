@@ -4,8 +4,16 @@ public class StartGame : MonoBehaviour
 {
     [SerializeField] WordDatabase words;
 
-    public void startGame(string filename)
+    public void startGame(bool isGame)
     {
-        GameManager.Instance.SetWords(words, filename);
+        if (isGame)
+        {
+            GameManager.Instance.SetWords(words, HighScores.GamesFilename);
+        }
+        else
+        {
+            GameManager.Instance.SetWords(words, HighScores.MoviesFilename);
+        }
+        
     }
 }

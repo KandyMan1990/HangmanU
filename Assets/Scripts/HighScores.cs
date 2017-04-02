@@ -23,33 +23,45 @@ public static class HighScores
 
     public static void AddToList(int score, string filename)
     {
-        if(filename == dataFile)
+        if (!string.IsNullOrEmpty(filename))
         {
-            if (ScoreList == null)
-                ScoreList = new List<int>();
+            if (filename == dataFile)
+            {
+                if (ScoreList == null)
+                    ScoreList = new List<int>();
 
-            ScoreList.Add(score);
-            SaveScores(filename);
-        }
-        else if(filename == moviesDataFile)
-        {
-            if (MoviesScoreList == null)
-                MoviesScoreList = new List<int>();
+                ScoreList.Add(score);
+            }
+            else if (filename == moviesDataFile)
+            {
+                if (MoviesScoreList == null)
+                    MoviesScoreList = new List<int>();
 
-            MoviesScoreList.Add(score);
+                MoviesScoreList.Add(score);
+            }
+
             SaveScores(filename);
         }
     }
 
     static void SaveScores(string filename)
     {
-        BinaryFormatter bf = new BinaryFormatter();
-        FileStream file = File.Create(Application.persistentDataPath + "/" + filename);
+        if (!string.IsNullOrEmpty(filename))
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Create(Application.persistentDataPath + "/" + filename);
 
-        bf.Serialize(file, ScoreList);
+            if (filename == dataFile)
+            {
+                bf.Serialize(file, ScoreList);
+            }
+            else if (filename == moviesDataFile)
+            {
+                bf.Serialize(file, MoviesScoreList);
+            }
 
-        file.Close();
-
+            file.Close();
+        }
     }
 
     public static List<int> LoadScores(string filename)
@@ -61,10 +73,18 @@ public static class HighScores
                 BinaryFormatter bf = new BinaryFormatter();
                 FileStream file = File.OpenRead(Application.persistentDataPath + "/" + filename);
 
-                ScoreList = (List<int>)bf.Deserialize(file);
-                file.Close();
-
-                return ScoreList;
+                if (filename == dataFile)
+                {
+                    ScoreList = (List<int>)bf.Deserialize(file);
+                    file.Close();
+                    return ScoreList;
+                }
+                else if (filename == moviesDataFile)
+                {
+                    MoviesScoreList = (List<int>)bf.Deserialize(file);
+                    file.Close();
+                    return MoviesScoreList;
+                }
             }
         }
 
