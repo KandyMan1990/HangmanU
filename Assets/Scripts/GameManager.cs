@@ -12,7 +12,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] AudioClip CorrectAnswer;
     [SerializeField] AudioClip LostGame;
     [SerializeField] AudioClip WinGame;
-    [SerializeField] string[] words;
     [SerializeField] List<string> availableWords = new List<string>();
 
     int currentRoundScore;
@@ -21,6 +20,7 @@ public class GameManager : MonoBehaviour
     List<string> usedKeys = new List<string>();
     bool canCheckState = true;
     UpdateGUI GUI;
+    List<string> words;
 
     public static GameManager Instance
     {
@@ -70,15 +70,25 @@ public class GameManager : MonoBehaviour
                 Destroy(gameObject);
             }
         }
+
+        DontDestroyOnLoad(gameObject);
     }
     
-    void Start()
+    public void StartGame()
     {
+        availableWords.Clear();
+        availableWords.TrimExcess();
+
         availableWords.AddRange(words);
 
         GUI = FindObjectOfType(typeof(UpdateGUI)) as UpdateGUI;
         score = 0;
         Reset();
+    }
+
+    public void SetWords(WordDatabase db)
+    {
+        words = db.GetWords();
     }
 
     void Reset()

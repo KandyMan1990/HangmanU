@@ -31,4 +31,9 @@ public class WordDatabase : ScriptableObject
     {
         words.RemoveAt(index);
     }
+
+    public List<string> GetWords()
+    {
+        return words;
+    }
 }
