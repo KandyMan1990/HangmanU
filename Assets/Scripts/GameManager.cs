@@ -21,6 +21,8 @@ public class GameManager : MonoBehaviour
     bool canCheckState = true;
     UpdateGUI GUI;
     List<string> words;
+    string _filename;
+    bool gameInProgress = false;
 
     public static GameManager Instance
     {
@@ -59,6 +61,10 @@ public class GameManager : MonoBehaviour
         get { return score; }
     }
     public string CurrentWord { get; private set; }
+    public string ActiveFilename
+    {
+        get { return _filename; }
+    }
 
     void Awake()
     {
@@ -84,11 +90,13 @@ public class GameManager : MonoBehaviour
         GUI = FindObjectOfType(typeof(UpdateGUI)) as UpdateGUI;
         score = 0;
         Reset();
+        gameInProgress = true;
     }
 
-    public void SetWords(WordDatabase db)
+    public void SetWords(WordDatabase db, string filename)
     {
         words = db.GetWords();
+        _filename = filename;
     }
 
     void Reset()
@@ -169,110 +177,113 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.anyKeyDown)
+        if (gameInProgress)
         {
-            string s = Input.inputString;
-            s = s.ToLower();
-            char c;
-
-            try
+            if (Input.anyKeyDown)
             {
-                char[] cArray = s.ToCharArray();
-                c = cArray[0];
-            }
-            catch
-            {
-                c = ' ';
-            }
+                string s = Input.inputString;
+                s = s.ToLower();
+                char c;
 
-            if (!usedKeys.Contains(s))
-            {
-                usedKeys.Add(s);
-                GUI.DisableButton(s);
-
-                switch (c)
+                try
                 {
-                    case 'a':
-                        ProcessInput(c);
-                        break;
-                    case 'b':
-                        ProcessInput(c);
-                        break;
-                    case 'c':
-                        ProcessInput(c);
-                        break;
-                    case 'd':
-                        ProcessInput(c);
-                        break;
-                    case 'e':
-                        ProcessInput(c);
-                        break;
-                    case 'f':
-                        ProcessInput(c);
-                        break;
-                    case 'g':
-                        ProcessInput(c);
-                        break;
-                    case 'h':
-                        ProcessInput(c);
-                        break;
-                    case 'i':
-                        ProcessInput(c);
-                        break;
-                    case 'j':
-                        ProcessInput(c);
-                        break;
-                    case 'k':
-                        ProcessInput(c);
-                        break;
-                    case 'l':
-                        ProcessInput(c);
-                        break;
-                    case 'm':
-                        ProcessInput(c);
-                        break;
-                    case 'n':
-                        ProcessInput(c);
-                        break;
-                    case 'o':
-                        ProcessInput(c);
-                        break;
-                    case 'p':
-                        ProcessInput(c);
-                        break;
-                    case 'q':
-                        ProcessInput(c);
-                        break;
-                    case 'r':
-                        ProcessInput(c);
-                        break;
-                    case 's':
-                        ProcessInput(c);
-                        break;
-                    case 't':
-                        ProcessInput(c);
-                        break;
-                    case 'u':
-                        ProcessInput(c);
-                        break;
-                    case 'v':
-                        ProcessInput(c);
-                        break;
-                    case 'w':
-                        ProcessInput(c);
-                        break;
-                    case 'x':
-                        ProcessInput(c);
-                        break;
-                    case 'y':
-                        ProcessInput(c);
-                        break;
-                    case 'z':
-                        ProcessInput(c);
-                        break;
-                    default:
-                        //invalid input
-                        break;
+                    char[] cArray = s.ToCharArray();
+                    c = cArray[0];
+                }
+                catch
+                {
+                    c = ' ';
+                }
+
+                if (!usedKeys.Contains(s))
+                {
+                    usedKeys.Add(s);
+                    GUI.DisableButton(s);
+
+                    switch (c)
+                    {
+                        case 'a':
+                            ProcessInput(c);
+                            break;
+                        case 'b':
+                            ProcessInput(c);
+                            break;
+                        case 'c':
+                            ProcessInput(c);
+                            break;
+                        case 'd':
+                            ProcessInput(c);
+                            break;
+                        case 'e':
+                            ProcessInput(c);
+                            break;
+                        case 'f':
+                            ProcessInput(c);
+                            break;
+                        case 'g':
+                            ProcessInput(c);
+                            break;
+                        case 'h':
+                            ProcessInput(c);
+                            break;
+                        case 'i':
+                            ProcessInput(c);
+                            break;
+                        case 'j':
+                            ProcessInput(c);
+                            break;
+                        case 'k':
+                            ProcessInput(c);
+                            break;
+                        case 'l':
+                            ProcessInput(c);
+                            break;
+                        case 'm':
+                            ProcessInput(c);
+                            break;
+                        case 'n':
+                            ProcessInput(c);
+                            break;
+                        case 'o':
+                            ProcessInput(c);
+                            break;
+                        case 'p':
+                            ProcessInput(c);
+                            break;
+                        case 'q':
+                            ProcessInput(c);
+                            break;
+                        case 'r':
+                            ProcessInput(c);
+                            break;
+                        case 's':
+                            ProcessInput(c);
+                            break;
+                        case 't':
+                            ProcessInput(c);
+                            break;
+                        case 'u':
+                            ProcessInput(c);
+                            break;
+                        case 'v':
+                            ProcessInput(c);
+                            break;
+                        case 'w':
+                            ProcessInput(c);
+                            break;
+                        case 'x':
+                            ProcessInput(c);
+                            break;
+                        case 'y':
+                            ProcessInput(c);
+                            break;
+                        case 'z':
+                            ProcessInput(c);
+                            break;
+                        default:
+                            //invalid input
+                            break;
+                    }
                 }
             }
         }
@@ -283,13 +294,14 @@ public class GameManager : MonoBehaviour
         if (currentRoundScore <= 0)
         {
             if (score > 0)
-                HighScores.AddToList(score);
+                HighScores.AddToList(score, _filename);
 
             if (LostGame)
                 SFXManager.Instance.PlaySFX(LostGame);
 
             CurrentWord = currentWord;
             SceneManager.LoadSceneAsync("FinishedWord", LoadSceneMode.Additive);
+            gameInProgress = false;
         }
         else if (!GUI.GetWord().Contains("_"))
         {
@@ -304,6 +316,7 @@ public class GameManager : MonoBehaviour
                 SceneManager.LoadSceneAsync("FinishedWord", LoadSceneMode.Additive);
                 score += currentRoundScore;
                 Invoke("Reset", 2.9f);
+                gameInProgress = false;
             }
         }
         else
@@ -315,11 +328,12 @@ public class GameManager : MonoBehaviour
     void WonGame()
     {
         score += currentRoundScore;
-        HighScores.AddToList(score);
+        HighScores.AddToList(score, _filename);
 
         if (CorrectAnswer)
             SFXManager.Instance.PlaySFX(WinGame);
 
         SceneManager.LoadSceneAsync("FinishedGame", LoadSceneMode.Additive);
+        gameInProgress = false;
     }
 }

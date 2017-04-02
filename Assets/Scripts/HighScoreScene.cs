@@ -12,7 +12,6 @@ public class HighScoreScene : MonoBehaviour
 
     List<int> list;
 
-    // Use this for initialization
     void Start()
     {
         Load();
@@ -20,7 +19,7 @@ public class HighScoreScene : MonoBehaviour
 
     void Load()
     {
-        list = HighScores.LoadScores();
+        list = HighScores.LoadScores(GameManager.Instance.ActiveFilename);
 
         if (list != null)
         {

@@ -7,21 +7,44 @@ using System.Runtime.Serialization.Formatters.Binary;
 public static class HighScores
 {
     static string dataFile = "scores.txt";
-    static List<int> ScoreList = LoadScores();
+    static string moviesDataFile = "movies_scores.txt";
+    static List<int> ScoreList = LoadScores(dataFile);
+    static List<int> MoviesScoreList = LoadScores(moviesDataFile);
 
-    public static void AddToList(int score)
+    public static string GamesFilename
     {
-        if (ScoreList == null)
-            ScoreList = new List<int>();
-
-        ScoreList.Add(score);
-        SaveScores();
+        get { return dataFile; }
     }
 
-    static void SaveScores()
+    public static string MoviesFilename
+    {
+        get { return moviesDataFile; }
+    }
+
+    public static void AddToList(int score, string filename)
+    {
+        if(filename == dataFile)
+        {
+            if (ScoreList == null)
+                ScoreList = new List<int>();
+
+            ScoreList.Add(score);
+            SaveScores(filename);
+        }
+        else if(filename == moviesDataFile)
+        {
+            if (MoviesScoreList == null)
+                MoviesScoreList = new List<int>();
+
+            MoviesScoreList.Add(score);
+            SaveScores(filename);
+        }
+    }
+
+    static void SaveScores(string filename)
     {
         BinaryFormatter bf = new BinaryFormatter();
-        FileStream file = File.Create(Application.persistentDataPath + "/" + dataFile);
+        FileStream file = File.Create(Application.persistentDataPath + "/" + filename);
 
         bf.Serialize(file, ScoreList);
 
@@ -29,18 +52,22 @@ public static class HighScores
 
     }
 
-    public static List<int> LoadScores()
+    public static List<int> LoadScores(string filename)
     {
-        if(File.Exists(Application.persistentDataPath + "/" + dataFile))
+        if (!string.IsNullOrEmpty(filename))
         {
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.OpenRead(Application.persistentDataPath + "/" + dataFile);
+            if (File.Exists(Application.persistentDataPath + "/" + filename))
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                FileStream file = File.OpenRead(Application.persistentDataPath + "/" + filename);
 
-            ScoreList = (List<int>)bf.Deserialize(file);
-            file.Close();
+                ScoreList = (List<int>)bf.Deserialize(file);
+                file.Close();
 
-            return ScoreList;
+                return ScoreList;
+            }
         }
+
         return null;
     }
 }
