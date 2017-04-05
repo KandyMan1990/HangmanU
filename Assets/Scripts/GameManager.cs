@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
     List<string> words;
     string _filename;
     bool gameInProgress = false;
+    DatabaseType dbType;
 
     public static GameManager Instance
     {
@@ -65,6 +66,10 @@ public class GameManager : MonoBehaviour
     {
         get { return _filename; }
     }
+    public string DatabaseType
+    {
+        get { return dbType == global::DatabaseType.GAMES ? "Games" : "Movies"; }
+    }
 
     void Awake()
     {
@@ -93,10 +98,11 @@ public class GameManager : MonoBehaviour
         gameInProgress = true;
     }
 
-    public void SetWords(WordDatabase db, string filename)
+    public void SetWords(WordDatabase db, string filename, DatabaseType dbtype)
     {
         words = db.GetWords();
         _filename = filename;
+        dbType = dbtype;
     }
 
     void Reset()
@@ -335,4 +341,10 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadSceneAsync("FinishedGame", LoadSceneMode.Additive);
         gameInProgress = false;
     }
+}
+
+public enum DatabaseType
+{
+    GAMES,
+    MOVIES
 }

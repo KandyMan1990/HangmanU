@@ -8,11 +8,11 @@ public class StartGame : MonoBehaviour
     {
         if (isGame)
         {
-            GameManager.Instance.SetWords(words, HighScores.GamesFilename);
+            GameManager.Instance.SetWords(words, HighScores.GamesFilename, DatabaseType.GAMES);
         }
         else
         {
-            GameManager.Instance.SetWords(words, HighScores.MoviesFilename);
+            GameManager.Instance.SetWords(words, HighScores.MoviesFilename, DatabaseType.MOVIES);
         }
         
     }

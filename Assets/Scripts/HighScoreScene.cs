@@ -4,11 +4,12 @@ using System.Collections.Generic;
 
 public class HighScoreScene : MonoBehaviour
 {
-    public Text Score1;
-    public Text Score2;
-    public Text Score3;
-    public Text Score4;
-    public Text Score5;
+    [SerializeField] Text Title;
+    [SerializeField] Text Score1;
+    [SerializeField] Text Score2;
+    [SerializeField] Text Score3;
+    [SerializeField] Text Score4;
+    [SerializeField] Text Score5;
 
     List<int> list;
 
@@ -19,6 +20,8 @@ public class HighScoreScene : MonoBehaviour
 
     void Load()
     {
+        Title.text = GameManager.Instance.DatabaseType + " High Scores";
+
         list = HighScores.LoadScores(GameManager.Instance.ActiveFilename);
 
         if (list != null)
