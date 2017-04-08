@@ -123,6 +123,7 @@ public class GameManager : MonoBehaviour
             GUI.EnableButtons(true);
             usedKeys.Clear();
             usedKeys.TrimExcess();
+            GUI.SetCanvasActive(true);
             GUI.UpdateUI(currentRoundScore, score);
         }
     }
@@ -307,6 +308,7 @@ public class GameManager : MonoBehaviour
 
             CurrentWord = currentWord;
             SceneManager.LoadSceneAsync("FinishedWord", LoadSceneMode.Additive);
+            GUI.SetCanvasActive(false);
             gameInProgress = false;
         }
         else if (!GUI.GetWord().Contains("_"))
@@ -320,8 +322,9 @@ public class GameManager : MonoBehaviour
 
                 CurrentWord = currentWord;
                 SceneManager.LoadSceneAsync("FinishedWord", LoadSceneMode.Additive);
+                GUI.SetCanvasActive(false);
                 score += currentRoundScore;
-                Invoke("Reset", 2.9f);
+                Invoke("Reset", 3.05f);
             }
         }
         else
@@ -336,9 +339,10 @@ public class GameManager : MonoBehaviour
         HighScores.AddToList(score, _filename);
 
         if (CorrectAnswer)
-            SFXManager.Instance.PlaySFX(WinGame);
+            SFXManager.Instance.PlaySFX(CorrectAnswer);
 
         SceneManager.LoadSceneAsync("FinishedGame", LoadSceneMode.Additive);
+        GUI.SetCanvasActive(false);
         gameInProgress = false;
     }
 }

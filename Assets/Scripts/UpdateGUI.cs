@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class UpdateGUI : MonoBehaviour
 {
+    [SerializeField] Canvas MainCanvas;
     [SerializeField] Text Lives;
     [SerializeField] Text Score;
     [SerializeField] Text Word;
@@ -81,5 +82,10 @@ public class UpdateGUI : MonoBehaviour
     public void SetWordText(string word)
     {
         Word.text = word;
+    }
+
+    public void SetCanvasActive(bool active)
+    {
+        MainCanvas.gameObject.SetActive(active);
     }
 }
