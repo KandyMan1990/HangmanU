@@ -7,6 +7,7 @@ public class HighScoreScene : MonoBehaviour
 {
     [SerializeField] Text Title;
     [SerializeField] GameObject ScorePrefab;
+    [SerializeField] GameObject Loading;
     [SerializeField] GameObject LoadFailed;
     [SerializeField] Transform Panel;
 
@@ -22,6 +23,8 @@ public class HighScoreScene : MonoBehaviour
     {
         list = await HighScores.LoadScoresFromDB(GameManager.Instance.ActiveScoreType);
 
+        Destroy(Loading);
+
         if (list.Count == 0)
         {
             LoadFailed.SetActive(true);
@@ -33,5 +36,7 @@ public class HighScoreScene : MonoBehaviour
             var score = Instantiate(ScorePrefab, Panel).GetComponent<Text>();
             score.text = $"{i + 1}. {list[i].UserName} - {list[i].Score}";
         }
+
+        Destroy(LoadFailed);
     }
 }

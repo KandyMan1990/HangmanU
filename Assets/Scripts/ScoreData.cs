@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using UnityEngine;
 
 [System.Serializable]
 public struct ScoreData
@@ -16,11 +17,11 @@ public struct ScoreData
         }
         catch (Exception e)
         {
+            Debug.LogError(e.Message);
             return new List<ScoreData>();
         }
     }
 }
-
 public enum ScoreType
 {
     GAME,
