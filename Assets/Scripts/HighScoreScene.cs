@@ -1,36 +1,37 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public class HighScoreScene : MonoBehaviour
 {
     [SerializeField] Text Title;
     [SerializeField] GameObject ScorePrefab;
+    [SerializeField] GameObject LoadFailed;
     [SerializeField] Transform Panel;
 
-    List<int> list;
+    List<ScoreData> list;
 
-    void Start()
+    async void Start()
     {
         Title.text = $"{GameManager.Instance.DatabaseType} High Scores";
-        LoadScores();
+        await LoadScores();
     }
 
-    void LoadScores()
+    async Task LoadScores()
     {
-        list = HighScores.LoadScores(GameManager.Instance.ActiveFilename);
+        list = await HighScores.LoadScoresFromDB(GameManager.Instance.ActiveScoreType);
 
-        if (list == null || list.Count == 0)
+        if (list.Count == 0)
         {
-            var textObj = Instantiate(ScorePrefab, Panel).GetComponent<Text>();
-            textObj.text = "Failed to load high scores";
+            LoadFailed.SetActive(true);
             return;
         }
 
         for (var i = 0; i < list.Count; i++)
         {
             var score = Instantiate(ScorePrefab, Panel).GetComponent<Text>();
-            score.text = $"{i + 1}. username - {list[i]}";
+            score.text = $"{i + 1}. {list[i].UserName} - {list[i].Score}";
         }
     }
 }

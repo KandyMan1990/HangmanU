@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
@@ -21,7 +20,7 @@ public class GameManager : MonoBehaviour
     bool canCheckState = true;
     UpdateGUI GUI;
     List<string> words;
-    string _filename;
+    ScoreType scoreType;
     bool gameInProgress = false;
     DatabaseType dbType;
 
@@ -62,9 +61,9 @@ public class GameManager : MonoBehaviour
         get { return score; }
     }
     public string CurrentWord { get; private set; }
-    public string ActiveFilename
+    public ScoreType ActiveScoreType
     {
-        get { return _filename; }
+        get { return scoreType; }
     }
     public string DatabaseType
     {
@@ -98,10 +97,10 @@ public class GameManager : MonoBehaviour
         gameInProgress = true;
     }
 
-    public void SetWords(WordDatabase db, string filename, DatabaseType dbtype)
+    public void SetWords(WordDatabase db, ScoreType scoreType, DatabaseType dbtype)
     {
         words = db.GetWords();
-        _filename = filename;
+        this.scoreType = scoreType;
         dbType = dbtype;
     }
 
@@ -301,7 +300,7 @@ public class GameManager : MonoBehaviour
         if (currentRoundScore <= 0)
         {
             if (score > 0)
-                HighScores.AddToList(score, _filename);
+                HighScores.AddToList(score, scoreType);
 
             if (LostGame)
                 SFXManager.Instance.PlaySFX(LostGame);
@@ -336,7 +335,7 @@ public class GameManager : MonoBehaviour
     void WonGame()
     {
         score += currentRoundScore;
-        HighScores.AddToList(score, _filename);
+        HighScores.AddToList(score, scoreType);
 
         if (CorrectAnswer)
             SFXManager.Instance.PlaySFX(CorrectAnswer);

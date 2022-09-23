@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
+using System.Net.Http;
+using Newtonsoft.Json;
+using System;
 
 [System.Serializable]
 public static class HighScores
@@ -11,37 +15,29 @@ public static class HighScores
     static List<int> ScoreList = LoadScores(dataFile);
     static List<int> MoviesScoreList = LoadScores(moviesDataFile);
 
-    public static string GamesFilename
-    {
-        get { return dataFile; }
-    }
+    private static readonly HttpClient client = new();
+    private const string GAME_ENDPOINT = "http://hangmanu-game.kandykave.com/";
+    private const string MOVIE_ENDPOINT = "http://hangmanu-movie.kandykave.com/";
 
-    public static string MoviesFilename
+    public static void AddToList(int score, ScoreType scoreType)
     {
-        get { return moviesDataFile; }
-    }
-
-    public static void AddToList(int score, string filename)
-    {
-        if (!string.IsNullOrEmpty(filename))
+        if (scoreType == ScoreType.GAME)
         {
-            if (filename == dataFile)
-            {
-                if (ScoreList == null)
-                    ScoreList = new List<int>();
+            if (ScoreList == null)
+                ScoreList = new List<int>();
 
-                ScoreList.Add(score);
-            }
-            else if (filename == moviesDataFile)
-            {
-                if (MoviesScoreList == null)
-                    MoviesScoreList = new List<int>();
-
-                MoviesScoreList.Add(score);
-            }
-
-            SaveScores(filename);
+            ScoreList.Add(score);
         }
+        else if (scoreType == ScoreType.MOVIE)
+        {
+            if (MoviesScoreList == null)
+                MoviesScoreList = new List<int>();
+
+            MoviesScoreList.Add(score);
+        }
+
+        var filename = scoreType == ScoreType.GAME ? dataFile : moviesDataFile;
+        SaveScores(filename);        
     }
 
     static void SaveScores(string filename)
@@ -62,6 +58,15 @@ public static class HighScores
 
             file.Close();
         }
+    }
+
+    public static async Task<List<ScoreData>> LoadScoresFromDB(ScoreType scoreType)
+    {
+        var endpoint = scoreType == ScoreType.GAME ? GAME_ENDPOINT : MOVIE_ENDPOINT;
+
+        var json = await client.GetStringAsync(endpoint);
+
+        return ScoreData.ParseJson(json);
     }
 
     public static List<int> LoadScores(string filename)
