@@ -1,98 +1,51 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Net.Http;
+using System.Text;
 using Newtonsoft.Json;
-using System;
 
 [System.Serializable]
 public static class HighScores
 {
-    static string dataFile = "scores.txt";
-    static string moviesDataFile = "movies_scores.txt";
-    static List<int> ScoreList = LoadScores(dataFile);
-    static List<int> MoviesScoreList = LoadScores(moviesDataFile);
-
     private static readonly HttpClient client = new();
-    private const string GAME_ENDPOINT = "http://hangmanu-game.kandykave.com/";
-    private const string MOVIE_ENDPOINT = "http://hangmanu-movie.kandykave.com/";
+    private const string GetScoresEndpoint = "http://kandykave.com:18080/getscores";
+    private const string SetScoresEndpoint = "http://kandykave.com:18080/setscore";
 
-    public static void AddToList(int score, ScoreType scoreType)
+    public static async Task AddScoreToDB(int score, string name, ScoreType scoreType)
     {
-        if (scoreType == ScoreType.GAME)
+        var mode = scoreType == ScoreType.GAME ? 0 : 1;
+        var data = new Dictionary<string, object>
         {
-            if (ScoreList == null)
-                ScoreList = new List<int>();
+            {"mode", mode},
+            {"username", name },
+            {"score", score }
+        };
 
-            ScoreList.Add(score);
-        }
-        else if (scoreType == ScoreType.MOVIE)
+        var request = JsonConvert.SerializeObject(data).ToLower();
+        var content = new HttpRequestMessage(HttpMethod.Post, SetScoresEndpoint)
         {
-            if (MoviesScoreList == null)
-                MoviesScoreList = new List<int>();
+            Content = new StringContent(request, Encoding.UTF8, "application/json")
+        };
 
-            MoviesScoreList.Add(score);
-        }
-
-        var filename = scoreType == ScoreType.GAME ? dataFile : moviesDataFile;
-        SaveScores(filename);        
-    }
-
-    static void SaveScores(string filename)
-    {
-        if (!string.IsNullOrEmpty(filename))
-        {
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Create(Application.persistentDataPath + "/" + filename);
-
-            if (filename == dataFile)
-            {
-                bf.Serialize(file, ScoreList);
-            }
-            else if (filename == moviesDataFile)
-            {
-                bf.Serialize(file, MoviesScoreList);
-            }
-
-            file.Close();
-        }
+        var response = await client.SendAsync(content);
     }
 
     public static async Task<List<ScoreData>> LoadScoresFromDB(ScoreType scoreType)
     {
-        var endpoint = scoreType == ScoreType.GAME ? GAME_ENDPOINT : MOVIE_ENDPOINT;
-
-        var json = await client.GetStringAsync(endpoint);
-
-        return ScoreData.ParseJson(json);
-    }
-
-    public static List<int> LoadScores(string filename)
-    {
-        if (!string.IsNullOrEmpty(filename))
+        var mode = scoreType == ScoreType.GAME ? 0 : 1;
+        var data = new Dictionary<string, int>
         {
-            if (File.Exists(Application.persistentDataPath + "/" + filename))
-            {
-                BinaryFormatter bf = new BinaryFormatter();
-                FileStream file = File.OpenRead(Application.persistentDataPath + "/" + filename);
+            {"mode", mode}
+        };
+        var request = JsonConvert.SerializeObject(data);
+        var message = new HttpRequestMessage(HttpMethod.Post, GetScoresEndpoint)
+        {
+            Content = new StringContent(request, Encoding.UTF8, "application/json")
+        };
 
-                if (filename == dataFile)
-                {
-                    ScoreList = (List<int>)bf.Deserialize(file);
-                    file.Close();
-                    return ScoreList;
-                }
-                else if (filename == moviesDataFile)
-                {
-                    MoviesScoreList = (List<int>)bf.Deserialize(file);
-                    file.Close();
-                    return MoviesScoreList;
-                }
-            }
-        }
+        var response = await client.SendAsync(message);
+        var json = await response.Content.ReadAsStringAsync();
 
-        return null;
+        return ScoreData.FromJson(json);
     }
 }

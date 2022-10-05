@@ -9,7 +9,7 @@ public struct ScoreData
     public string UserName;
     public int Score;
 
-    public static List<ScoreData> ParseJson(string json)
+    public static List<ScoreData> FromJson(string json)
     {
         try
         {
@@ -21,9 +21,21 @@ public struct ScoreData
             return new List<ScoreData>();
         }
     }
+
+    public static string ToJson(string username, int score)
+    {
+        return JsonConvert.SerializeObject(new ScoreData { UserName = username, Score = score });
+    }
 }
 public enum ScoreType
 {
     GAME,
     MOVIE
+}
+
+public enum ApiCmd
+{
+    NONE,
+    GET,
+    POST
 }

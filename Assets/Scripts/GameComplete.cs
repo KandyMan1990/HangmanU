@@ -1,21 +1,32 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameComplete : MonoBehaviour
 {
     public Text text;
+    public Text userName;
 
-    // Use this for initialization
+    int score;
+    ScoreType scoreType;
+
     void Start()
     {
-        text.text = "Your score was " + GameManager.Instance.Score + "!";
-        Invoke("MainMenu", 3f);
+        score = GameManager.Instance.Score;
+        scoreType = GameManager.Instance.ActiveScoreType;
+        text.text = $"Your score was {score}!";
     }
 
-    void MainMenu()
+    public void SubmitScore()
     {
+        _ = Process();
+    }
+
+    public async Task Process()
+    {
+        await HighScores.AddScoreToDB(score, userName.text, scoreType);
+
         SceneManager.LoadSceneAsync(0);
     }
 }

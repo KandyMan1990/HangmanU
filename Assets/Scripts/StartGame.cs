@@ -6,14 +6,8 @@ public class StartGame : MonoBehaviour
 
     public void startGame(bool isGame)
     {
-        if (isGame)
-        {
-            GameManager.Instance.SetWords(words, ScoreType.GAME, DatabaseType.GAMES);
-        }
-        else
-        {
-            GameManager.Instance.SetWords(words, ScoreType.MOVIE, DatabaseType.MOVIES);
-        }
-        
+        var scoreType = isGame ? ScoreType.GAME : ScoreType.MOVIE;
+
+        GameManager.Instance.SetWords(words, scoreType);
     }
 }

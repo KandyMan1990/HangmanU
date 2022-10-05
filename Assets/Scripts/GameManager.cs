@@ -11,18 +11,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] AudioClip CorrectAnswer;
     [SerializeField] AudioClip LostGame;
     [SerializeField] AudioClip WinGame;
-    [SerializeField] List<string> availableWords = new List<string>();
+    [SerializeField] List<string> availableWords = new();
 
     int currentRoundScore;
     int score;
     string currentWord;
-    List<string> usedKeys = new List<string>();
+    readonly List<string> usedKeys = new();
     bool canCheckState = true;
     UpdateGUI GUI;
     List<string> words;
     ScoreType scoreType;
     bool gameInProgress = false;
-    DatabaseType dbType;
 
     public static GameManager Instance
     {
@@ -67,7 +66,7 @@ public class GameManager : MonoBehaviour
     }
     public string DatabaseType
     {
-        get { return dbType == global::DatabaseType.GAMES ? "Games" : "Movies"; }
+        get { return scoreType == ScoreType.GAME ? "Games" : "Movies"; }
     }
 
     void Awake()
@@ -97,11 +96,10 @@ public class GameManager : MonoBehaviour
         gameInProgress = true;
     }
 
-    public void SetWords(WordDatabase db, ScoreType scoreType, DatabaseType dbtype)
+    public void SetWords(WordDatabase db, ScoreType scoreType)
     {
         words = db.GetWords();
         this.scoreType = scoreType;
-        dbType = dbtype;
     }
 
     void Reset()
@@ -209,80 +207,30 @@ public class GameManager : MonoBehaviour
                     switch (c)
                     {
                         case 'a':
-                            ProcessInput(c);
-                            break;
                         case 'b':
-                            ProcessInput(c);
-                            break;
                         case 'c':
-                            ProcessInput(c);
-                            break;
                         case 'd':
-                            ProcessInput(c);
-                            break;
                         case 'e':
-                            ProcessInput(c);
-                            break;
                         case 'f':
-                            ProcessInput(c);
-                            break;
                         case 'g':
-                            ProcessInput(c);
-                            break;
                         case 'h':
-                            ProcessInput(c);
-                            break;
                         case 'i':
-                            ProcessInput(c);
-                            break;
                         case 'j':
-                            ProcessInput(c);
-                            break;
                         case 'k':
-                            ProcessInput(c);
-                            break;
                         case 'l':
-                            ProcessInput(c);
-                            break;
                         case 'm':
-                            ProcessInput(c);
-                            break;
                         case 'n':
-                            ProcessInput(c);
-                            break;
                         case 'o':
-                            ProcessInput(c);
-                            break;
                         case 'p':
-                            ProcessInput(c);
-                            break;
                         case 'q':
-                            ProcessInput(c);
-                            break;
                         case 'r':
-                            ProcessInput(c);
-                            break;
                         case 's':
-                            ProcessInput(c);
-                            break;
                         case 't':
-                            ProcessInput(c);
-                            break;
                         case 'u':
-                            ProcessInput(c);
-                            break;
                         case 'v':
-                            ProcessInput(c);
-                            break;
                         case 'w':
-                            ProcessInput(c);
-                            break;
                         case 'x':
-                            ProcessInput(c);
-                            break;
                         case 'y':
-                            ProcessInput(c);
-                            break;
                         case 'z':
                             ProcessInput(c);
                             break;
@@ -299,16 +247,12 @@ public class GameManager : MonoBehaviour
     {
         if (currentRoundScore <= 0)
         {
-            if (score > 0)
-                HighScores.AddToList(score, scoreType);
-
             if (LostGame)
                 SFXManager.Instance.PlaySFX(LostGame);
 
             CurrentWord = currentWord;
-            SceneManager.LoadSceneAsync("FinishedWord", LoadSceneMode.Additive);
-            GUI.SetCanvasActive(false);
-            gameInProgress = false;
+
+            EndGame("FinishedWord");
         }
         else if (!GUI.GetWord().Contains("_"))
         {
@@ -323,7 +267,7 @@ public class GameManager : MonoBehaviour
                 SceneManager.LoadSceneAsync("FinishedWord", LoadSceneMode.Additive);
                 GUI.SetCanvasActive(false);
                 score += currentRoundScore;
-                Invoke("Reset", 3.05f);
+                Invoke("Reset", 3.1f);
             }
         }
         else
@@ -335,19 +279,17 @@ public class GameManager : MonoBehaviour
     void WonGame()
     {
         score += currentRoundScore;
-        HighScores.AddToList(score, scoreType);
 
         if (CorrectAnswer)
             SFXManager.Instance.PlaySFX(CorrectAnswer);
 
-        SceneManager.LoadSceneAsync("FinishedGame", LoadSceneMode.Additive);
+        EndGame("FinishedGame");
+    }
+
+    void EndGame(string sceneName)
+    {
+        SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
         GUI.SetCanvasActive(false);
         gameInProgress = false;
     }
-}
-
-public enum DatabaseType
-{
-    GAMES,
-    MOVIES
 }
