@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Collections;
 
 public class WordOver : MonoBehaviour
 {
@@ -13,6 +13,7 @@ public class WordOver : MonoBehaviour
     [SerializeField] Text userName;
 
     int score;
+    readonly WaitForSeconds wait = new(3f);
 
     void Start()
     {
@@ -22,19 +23,18 @@ public class WordOver : MonoBehaviour
 
         if (GameManager.Instance.CurrentRoundScore > 0)
         {
-            _ = ProcessWin();
+            ProcessWin();
             return;
         }
 
         ProcessLose();
     }
 
-    async Task ProcessWin()
+    void ProcessWin()
     {
         State.text = "Congratulations!";
         image.enabled = false;
-        await Task.Delay(3000);
-        SceneManager.UnloadSceneAsync("FinishedWord");
+        StartCoroutine(UnloadFinishedWord());
     }
 
     void ProcessLose()
@@ -43,7 +43,7 @@ public class WordOver : MonoBehaviour
         State.text = $"Sorry!  Your score was {score}";
         image.enabled = true;
 
-        StartCoroutine(HighScores.GetScores(GameManager.Instance.ActiveScoreType, async () =>
+        StartCoroutine(HighScores.GetScores(GameManager.Instance.ActiveScoreType, () =>
         {
             var scores = HighScores.GetScoresList;
 
@@ -53,9 +53,20 @@ public class WordOver : MonoBehaviour
                 return;
             }
 
-            await Task.Delay(3000);
-            SceneManager.LoadSceneAsync(0);
+            StartCoroutine(GoToMainMenu());
         }));
+    }
+
+    IEnumerator UnloadFinishedWord()
+    {
+        yield return wait;
+        SceneManager.UnloadSceneAsync("FinishedWord");
+    }
+
+    IEnumerator GoToMainMenu()
+    {
+        yield return wait;
+        SceneManager.LoadSceneAsync(0);
     }
 
     public void SubmitScore()
