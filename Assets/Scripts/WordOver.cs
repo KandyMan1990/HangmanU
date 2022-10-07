@@ -26,7 +26,7 @@ public class WordOver : MonoBehaviour
             return;
         }
 
-        _ = ProcessLose();
+        ProcessLose();
     }
 
     async Task ProcessWin()
@@ -37,33 +37,32 @@ public class WordOver : MonoBehaviour
         SceneManager.UnloadSceneAsync("FinishedWord");
     }
 
-    async Task ProcessLose()
+    void ProcessLose()
     {
         score = GameManager.Instance.Score;
         State.text = $"Sorry!  Your score was {score}";
         image.enabled = true;
 
-        var scores = await HighScores.LoadScoresFromDB(GameManager.Instance.ActiveScoreType);
-
-        if (scores.Any(s => score >= s.Score))
+        StartCoroutine(HighScores.GetScores(GameManager.Instance.ActiveScoreType, async () =>
         {
-            insertName.SetActive(true);
-            return;
-        }
+            var scores = HighScores.GetScoresList;
 
-        await Task.Delay(3000);
-        SceneManager.LoadSceneAsync(0);
+            if (scores.Any(s => score >= s.Score))
+            {
+                insertName.SetActive(true);
+                return;
+            }
+
+            await Task.Delay(3000);
+            SceneManager.LoadSceneAsync(0);
+        }));
     }
 
     public void SubmitScore()
     {
-        _ = SubmitScoreAsync();
-    }
-
-    async Task SubmitScoreAsync()
-    {
-        await HighScores.AddScoreToDB(score, userName.text, GameManager.Instance.ActiveScoreType);
-
-        SceneManager.LoadSceneAsync(0);
+        StartCoroutine(HighScores.SetScore(score, userName.text, GameManager.Instance.ActiveScoreType, () =>
+        {
+            SceneManager.LoadSceneAsync(0);
+        }));
     }
 }

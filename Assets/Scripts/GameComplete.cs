@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -20,13 +19,9 @@ public class GameComplete : MonoBehaviour
 
     public void SubmitScore()
     {
-        _ = Process();
-    }
-
-    public async Task Process()
-    {
-        await HighScores.AddScoreToDB(score, userName.text, scoreType);
-
-        SceneManager.LoadSceneAsync(0);
+        StartCoroutine(HighScores.SetScore(score, userName.text, scoreType, () =>
+        {
+            SceneManager.LoadSceneAsync(0);
+        }));
     }
 }
