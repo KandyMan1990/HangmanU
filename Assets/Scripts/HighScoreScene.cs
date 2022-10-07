@@ -4,47 +4,41 @@ using System.Collections.Generic;
 
 public class HighScoreScene : MonoBehaviour
 {
-    public Text Score1;
-    public Text Score2;
-    public Text Score3;
-    public Text Score4;
-    public Text Score5;
+    [SerializeField] Text Title;
+    [SerializeField] GameObject ScorePrefab;
+    [SerializeField] GameObject Loading;
+    [SerializeField] GameObject LoadFailed;
+    [SerializeField] Transform Panel;
 
-    List<int> list;
+    List<ScoreData> list;
 
-    // Use this for initialization
     void Start()
     {
-        Load();
+        Title.text = $"{GameManager.Instance.DatabaseType} High Scores";
+        LoadScores();
     }
 
-    void Load()
+    void LoadScores()
     {
-        list = HighScores.LoadScores();
-
-        if (list != null)
+        StartCoroutine(HighScores.GetScores(GameManager.Instance.ActiveScoreType, () =>
         {
-            if (list.Count > 0)
+            list = HighScores.GetScoresList;
+
+            Destroy(Loading);
+
+            if (list.Count == 0)
             {
-                list.Sort();
-                list.Reverse();
-                if (list.Count > 5)
-                    while (list.Count > 5)
-                        list.RemoveAt(list.Count - 1);
-
-                try
-                {
-                    Score1.text = "1. " + list[0];
-                    Score2.text = "2. " + list[1];
-                    Score3.text = "3. " + list[2];
-                    Score4.text = "4. " + list[3];
-                    Score5.text = "5. " + list[4];
-                }
-                catch
-                {
-
-                }
+                LoadFailed.SetActive(true);
+                return;
             }
-        }
+
+            for (var i = 0; i < list.Count; i++)
+            {
+                var score = Instantiate(ScorePrefab, Panel).GetComponent<Text>();
+                score.text = $"{i + 1}. {list[i].UserName} - {list[i].Score}";
+            }
+
+            Destroy(LoadFailed);
+        }));
     }
 }

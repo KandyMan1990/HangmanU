@@ -1,46 +1,62 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Net.Http;
+using System.Text;
+using Newtonsoft.Json;
+using System.Collections;
+using UnityEngine.Networking;
+using System;
 
 [System.Serializable]
 public static class HighScores
 {
-    static string dataFile = "scores.txt";
-    static List<int> ScoreList = LoadScores();
+    private static readonly HttpClient client = new();
+    private const string GetScoresEndpoint = "http://kandykave.com:18080/getscores";
+    private const string SetScoresEndpoint = "http://kandykave.com:18080/setscore";
 
-    public static void AddToList(int score)
+    public static List<ScoreData> GetScoresList { get; private set; }
+
+    public static IEnumerator GetScores(ScoreType scoreType, Action callback)
     {
-        if (ScoreList == null)
-            ScoreList = new List<int>();
-
-        ScoreList.Add(score);
-        SaveScores();
-    }
-
-    static void SaveScores()
-    {
-        BinaryFormatter bf = new BinaryFormatter();
-        FileStream file = File.Create(Application.persistentDataPath + "/" + dataFile);
-
-        bf.Serialize(file, ScoreList);
-
-        file.Close();
-
-    }
-
-    public static List<int> LoadScores()
-    {
-        if(File.Exists(Application.persistentDataPath + "/" + dataFile))
+        GetScoresList = null;
+        var mode = scoreType == ScoreType.GAME ? 0 : 1;
+        var data = new Dictionary<string, int>
         {
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.OpenRead(Application.persistentDataPath + "/" + dataFile);
+            {"mode", mode}
+        };
+        var json = JsonConvert.SerializeObject(data);
 
-            ScoreList = (List<int>)bf.Deserialize(file);
-            file.Close();
+        using var request = new UnityWebRequest(GetScoresEndpoint, "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
 
-            return ScoreList;
-        }
-        return null;
+        yield return request.SendWebRequest();
+
+        GetScoresList = ScoreData.FromJson(request.downloadHandler.text);
+        callback();
+    }
+
+    public static IEnumerator SetScore(int score, string name, ScoreType scoreType, Action callback)
+    {
+        var mode = scoreType == ScoreType.GAME ? 0 : 1;
+        var data = new Dictionary<string, object>
+        {
+            {"mode", mode},
+            {"username", name },
+            {"score", score }
+        };
+        var json = JsonConvert.SerializeObject(data).ToLower();
+
+        using var request = new UnityWebRequest(SetScoresEndpoint, "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        callback();
     }
 }

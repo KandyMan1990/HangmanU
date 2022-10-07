@@ -3,10 +3,9 @@
 --- !u!1 &194224
 GameObject:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
   m_Component:
   - component: {fileID: 486718}
   - component: {fileID: 11414740}
@@ -19,159 +18,42 @@ GameObject:
   m_IsActive: 1
 --- !u!4 &486718
 Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 194224}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &11414740
 MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 194224}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b949b3b131ebb44abf2c66ce162b34a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentWord: 
   CorrectInput: {fileID: 8300000, guid: a622cfea17b87aa4086f931f43f821b5, type: 3}
   IncorrectInput: {fileID: 8300000, guid: 4ecbb981021a93d49815be9055aa22e1, type: 3}
   CorrectAnswer: {fileID: 8300000, guid: dafada3c3e2a51441ab52329f1b60a71, type: 3}
   LostGame: {fileID: 8300000, guid: 01f0d2c2021ed9846ac21a37ddd7708e, type: 3}
   WinGame: {fileID: 8300000, guid: a14a25da138b2cf419971c469856c776, type: 3}
-  words:
-  - unreal tournament
-  - mortal kombat
-  - fifa
-  - tekken
-  - street fighter
-  - crysis
-  - thief
-  - final fantasy
-  - zelda
-  - sonic
-  - kirby
-  - pokemon
-  - monster hunter
-  - super smash bros
-  - super mario galaxy
-  - megaman
-  - fez
-  - metroid
-  - battlefield
-  - mass effect
-  - dragon age
-  - worms
-  - skyrim
-  - oblivion
-  - morrowind
-  - fallout
-  - splinter cell
-  - fable
-  - halo
-  - uncharted
-  - the last of us
-  - minecraft
-  - gears of war
-  - god of war
-  - littlebigplanet
-  - earthbound
-  - starcraft
-  - warcraft
-  - diablo
-  - devil may cry
-  - call of duty
-  - duke nukem
-  - journey
-  - tokyo jungle
-  - ni no kuni
-  - chrono trigger
-  - killzone
-  - resistance
-  - bulletstorm
-  - bioshock infinite
-  - borderlands
-  - grand theft auto
-  - injustice
-  - red dead redemption
-  - watch dogs
-  - sleeping dogs
-  - saints row
-  - need for speed
-  - burnout paradise
-  - titanfall
-  - red alert
-  - animal crossing
-  - total annihilation
-  - carmageddon
-  - house of the dead
-  - crazy taxi
-  - time crisis
-  - doom
-  - quake
-  - motorstorm
-  - far cry
-  - assassins creed
-  - wolfenstein
-  - breakout
-  - pitfall
-  - pacman
-  - rage
-  - goldeneye
-  - time splitters
-  - syndicate
-  - satellite reign
-  - resogun
-  - silent hill
-  - resident evil
-  - crash bandicoot
-  - spyro the dragon
-  - 'shadow of the colossus '
-  - the last guardian
-  - tomb raider
-  - driver
-  - rayman
-  - metal gear solid
-  - beyond good and evil
-  - beyond two souls
-  - heavy rain
-  - goat simulator
-  - the sims
-  - simcity
-  - conkers bad furday
-  - theme hospital
-  - theme park world
-  - portal
-  - half life
-  - team fortress
-  - left for dead
-  - batman arkham city
-  - infamous
-  - rust
-  - dayz
-  - marvel vs capcom
-  - dc universe
-  - wildstar
-  - euro truck simulator
-  - farm simulator
-  - true crime
-  - ratchet and clank
-  - elder scrolls online
-  - league of legends
-  - star wars battlefront
-  - the amazing adventures of van hellsing
-  - guitar hero
-  - rock band
-  - angry birds
   availableWords: []
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 194224}
+  m_IsPrefabParent: 1

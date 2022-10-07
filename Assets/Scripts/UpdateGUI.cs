@@ -4,12 +4,21 @@ using UnityEngine.UI;
 
 public class UpdateGUI : MonoBehaviour
 {
-    public Text Lives;
-    public Text Score;
-    public Text Word;
-    public Image image;
+    [SerializeField] Canvas MainCanvas;
+    [SerializeField] Text Lives;
+    [SerializeField] Text Score;
+    [SerializeField] Text Word;
+    [SerializeField] Image image;
+    [SerializeField] List<Button> Buttons;
 
-    public List<Button> Buttons;
+    const string CURRENT_ROUND_SCORE = "Score for this word: ";
+    const string SCORE = "Score: ";
+
+    void Start()
+    {
+        Lives.text += GameManager.Instance.CurrentRoundScore.ToString();
+        Score.text += GameManager.Instance.Score.ToString();
+    }
 
     public void EnableButtons(bool enabled)
     {
@@ -33,10 +42,50 @@ public class UpdateGUI : MonoBehaviour
         }
     }
 
-    // Use this for initialization
-    void Start()
+    public void Reset(char[] newWord, int currentRoundScore)
     {
-        Lives.text += GameManager.Instance.LivesRemaining.ToString();
-        Score.text += GameManager.Instance.Score.ToString();
+        image.sprite = (Sprite)Resources.Load(currentRoundScore.ToString(), typeof(Sprite));
+
+        SetUpWord(newWord);
+    }
+
+    void SetUpWord(char[] characters)
+    {
+        Word.text = string.Empty;
+
+        foreach (char c in characters)
+        {
+            if (char.IsWhiteSpace(c))
+                Word.text += c;
+            else
+                Word.text += '_';
+        }
+    }
+
+    public void UpdateUI(int currentRoundScore, int score)
+    {
+        image.sprite = (Sprite)Resources.Load(currentRoundScore.ToString(), typeof(Sprite));
+        Lives.text = CURRENT_ROUND_SCORE + (currentRoundScore).ToString();
+        Score.text = SCORE + score.ToString();
+    }
+
+    public char[] GetWordAsCharArray()
+    {
+        return Word.text.ToCharArray();
+    }
+
+    public string GetWord()
+    {
+        return Word.text;
+    }
+
+    public void SetWordText(string word)
+    {
+        Word.text = word;
+    }
+
+    public void SetCanvasActive(bool active)
+    {
+        MainCanvas.gameObject.SetActive(active);
     }
 }

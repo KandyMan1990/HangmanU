@@ -1,12 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.UI;
-using System.Linq;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     static GameManager instance;
+
+    [SerializeField] AudioClip CorrectInput;
+    [SerializeField] AudioClip IncorrectInput;
+    [SerializeField] AudioClip CorrectAnswer;
+    [SerializeField] AudioClip LostGame;
+    [SerializeField] AudioClip WinGame;
+    [SerializeField] List<string> availableWords = new();
+
+    int currentRoundScore;
+    int score;
+    string currentWord;
+    readonly List<string> usedKeys = new();
+    bool canCheckState = true;
+    UpdateGUI GUI;
+    List<string> words;
+    ScoreType scoreType;
+    bool gameInProgress = false;
 
     public static GameManager Instance
     {
@@ -17,7 +32,6 @@ public class GameManager : MonoBehaviour
                 instance = (GameManager)FindObjectOfType(typeof(GameManager));
                 if (instance == null)
                 {
-                    //Try loading a template prefab
                     GameObject templatePrefab = Resources.Load("GameManager") as GameObject;
 
                     GameObject GM;
@@ -27,9 +41,8 @@ public class GameManager : MonoBehaviour
                     }
                     else
                     {
-                        //Create a new one in hierarchy, and this one will persist throughout the game/scene too.
                         GM = new GameObject("Game Manager");
-                        GM.AddComponent<GameManager>(); //This point Awake will be called
+                        GM.AddComponent<GameManager>();
                     }
 
                     instance = GM.GetComponent<GameManager>();
@@ -38,107 +51,78 @@ public class GameManager : MonoBehaviour
             return instance;
         }
     }
-
-    void Awake()
+    public int CurrentRoundScore
     {
-        //Check for duplicates in the scene
-        Object[] GMs = FindObjectsOfType(typeof(GameManager));
-        for (int i = 0; i < GMs.Length; i++)
-        {
-            if (GMs[i] != this)
-            { //Not conform to singleton pattern
-              //Self destruct!
-                Destroy(gameObject);
-            }
-        }
-
-        //DontDestroyOnLoad(gameObject);
-    }
-
-    const string LIVES_REMAINING = "Lives Remaining: ";
-    const string SCORE = "Score: ";
-
-    int livesRemaining;
-    int score;
-    [SerializeField]
-    string currentWord;
-    List<string> usedKeys = new List<string>();
-    bool canCheckState = true;
-
-    public int LivesRemaining
-    {
-        get { return livesRemaining; }
+        get { return currentRoundScore; }
     }
     public int Score
     {
         get { return score; }
     }
     public string CurrentWord { get; private set; }
-    public AudioClip CorrectInput;
-    public AudioClip IncorrectInput;
-    public AudioClip CorrectAnswer;
-    public AudioClip LostGame;
-    public AudioClip WinGame;
-    Text LivesUI;
-    Text ScoreUI;
-    Text WordUI;
-    UpdateGUI GUI;
-
-    [SerializeField]
-    string[] words;
-
-    [SerializeField]
-    List<string> availableWords = new List<string>();
-
-    // Use this for initialization
-    void Start()
+    public ScoreType ActiveScoreType
     {
+        get { return scoreType; }
+    }
+    public string DatabaseType
+    {
+        get { return scoreType == ScoreType.GAME ? "Games" : "Movies"; }
+    }
+
+    void Awake()
+    {
+        Object[] GMs = FindObjectsOfType(typeof(GameManager));
+        for (int i = 0; i < GMs.Length; i++)
+        {
+            if (GMs[i] != this)
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        DontDestroyOnLoad(gameObject);
+    }
+    
+    public void StartGame()
+    {
+        availableWords.Clear();
+        availableWords.TrimExcess();
+
         availableWords.AddRange(words);
 
         GUI = FindObjectOfType(typeof(UpdateGUI)) as UpdateGUI;
-        LivesUI = GameObject.Find("UIManager").GetComponent<UpdateGUI>().Lives;
-        ScoreUI = GameObject.Find("UIManager").GetComponent<UpdateGUI>().Score;
-        WordUI = GameObject.Find("UIManager").GetComponent<UpdateGUI>().Word;
         score = 0;
         Reset();
+        gameInProgress = true;
+    }
+
+    public void SetWords(WordDatabase db, ScoreType scoreType)
+    {
+        words = db.GetWords();
+        this.scoreType = scoreType;
     }
 
     void Reset()
     {
-        livesRemaining = 10;
-        score += 100;
-        GUI.image.sprite = (Sprite)Resources.Load(livesRemaining.ToString(), typeof(Sprite));
-
         if (availableWords.Count > 0)
         {
+            currentRoundScore = 100;
+
             int i = Random.Range(0, availableWords.Count);
             currentWord = availableWords[i];
             availableWords.RemoveAt(i);
 
-
             char[] characters = currentWord.ToCharArray();
-            WordUI.text = string.Empty;
-            foreach (char c in characters)
-            {
-                if (char.IsWhiteSpace(c))
-                    WordUI.text += c;
-                else
-                    WordUI.text += '_';
-            }
+
+            GUI.Reset(characters, currentRoundScore);
 
             canCheckState = true;
             GUI.EnableButtons(true);
             usedKeys.Clear();
             usedKeys.TrimExcess();
-            UpdateUI();
+            GUI.SetCanvasActive(true);
+            GUI.UpdateUI(currentRoundScore, score);
         }
-    }
-
-    void UpdateUI()
-    {
-        //update hangman image
-        LivesUI.text = LIVES_REMAINING + livesRemaining.ToString();
-        ScoreUI.text = SCORE + score.ToString();
     }
 
     public void ClickedInput(char btnInput)
@@ -164,7 +148,7 @@ public class GameManager : MonoBehaviour
             if (currentWord.Contains(letter))
             {
                 char[] letters = currentWord.ToCharArray();
-                char[] displayWord = WordUI.text.ToCharArray();
+                char[] displayWord = GUI.GetWordAsCharArray();
 
                 for (int i = 0; i < letters.Length; i++)
                 {
@@ -173,18 +157,22 @@ public class GameManager : MonoBehaviour
                         displayWord[i] = letter;
                     }
                 }
-                WordUI.text = string.Empty;
+                string wordUI_Text = string.Empty;
+
                 foreach (char ch in displayWord)
-                    WordUI.text += ch;
+                {
+                    wordUI_Text += ch;
+                }
+
+                GUI.SetWordText(wordUI_Text);
+
                 SFXManager.Instance.PlaySFX(CorrectInput);
             }
             else
             {
-                livesRemaining -= 1;
-                score -= 10;
-                GUI.image.sprite = (Sprite)Resources.Load(livesRemaining.ToString(), typeof(Sprite));
+                currentRoundScore -= 10;
                 SFXManager.Instance.PlaySFX(IncorrectInput);
-                UpdateUI();
+                GUI.UpdateUI(currentRoundScore, score);
             }
 
             CheckPlayerState();
@@ -193,110 +181,63 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.anyKeyDown)
+        if (gameInProgress)
         {
-            string s = Input.inputString;
-            s = s.ToLower();
-            char c;
-
-            try
+            if (Input.anyKeyDown)
             {
-                char[] cArray = s.ToCharArray();
-                c = cArray[0];
-            }
-            catch
-            {
-                c = ' ';
-            }
+                string s = Input.inputString;
+                s = s.ToLower();
+                char c;
 
-            if (!usedKeys.Contains(s))
-            {
-                usedKeys.Add(s);
-                GUI.DisableButton(s);
-
-                switch (c)
+                try
                 {
-                    case 'a':
-                        ProcessInput(c);
-                        break;
-                    case 'b':
-                        ProcessInput(c);
-                        break;
-                    case 'c':
-                        ProcessInput(c);
-                        break;
-                    case 'd':
-                        ProcessInput(c);
-                        break;
-                    case 'e':
-                        ProcessInput(c);
-                        break;
-                    case 'f':
-                        ProcessInput(c);
-                        break;
-                    case 'g':
-                        ProcessInput(c);
-                        break;
-                    case 'h':
-                        ProcessInput(c);
-                        break;
-                    case 'i':
-                        ProcessInput(c);
-                        break;
-                    case 'j':
-                        ProcessInput(c);
-                        break;
-                    case 'k':
-                        ProcessInput(c);
-                        break;
-                    case 'l':
-                        ProcessInput(c);
-                        break;
-                    case 'm':
-                        ProcessInput(c);
-                        break;
-                    case 'n':
-                        ProcessInput(c);
-                        break;
-                    case 'o':
-                        ProcessInput(c);
-                        break;
-                    case 'p':
-                        ProcessInput(c);
-                        break;
-                    case 'q':
-                        ProcessInput(c);
-                        break;
-                    case 'r':
-                        ProcessInput(c);
-                        break;
-                    case 's':
-                        ProcessInput(c);
-                        break;
-                    case 't':
-                        ProcessInput(c);
-                        break;
-                    case 'u':
-                        ProcessInput(c);
-                        break;
-                    case 'v':
-                        ProcessInput(c);
-                        break;
-                    case 'w':
-                        ProcessInput(c);
-                        break;
-                    case 'x':
-                        ProcessInput(c);
-                        break;
-                    case 'y':
-                        ProcessInput(c);
-                        break;
-                    case 'z':
-                        ProcessInput(c);
-                        break;
-                    default:
-                        //invalid input
-                        break;
+                    char[] cArray = s.ToCharArray();
+                    c = cArray[0];
+                }
+                catch
+                {
+                    c = ' ';
+                }
+
+                if (!usedKeys.Contains(s))
+                {
+                    usedKeys.Add(s);
+                    GUI.DisableButton(s);
+
+                    switch (c)
+                    {
+                        case 'a':
+                        case 'b':
+                        case 'c':
+                        case 'd':
+                        case 'e':
+                        case 'f':
+                        case 'g':
+                        case 'h':
+                        case 'i':
+                        case 'j':
+                        case 'k':
+                        case 'l':
+                        case 'm':
+                        case 'n':
+                        case 'o':
+                        case 'p':
+                        case 'q':
+                        case 'r':
+                        case 's':
+                        case 't':
+                        case 'u':
+                        case 'v':
+                        case 'w':
+                        case 'x':
+                        case 'y':
+                        case 'z':
+                            ProcessInput(c);
+                            break;
+                        default:
+                            //invalid input
+                            break;
+                    }
                 }
             }
         }
@@ -304,18 +245,16 @@ public class GameManager : MonoBehaviour
 
     void CheckPlayerState()
     {
-        if (livesRemaining <= 0)
+        if (currentRoundScore <= 0)
         {
-            if (score > 0)
-                HighScores.AddToList(score);
-
             if (LostGame)
                 SFXManager.Instance.PlaySFX(LostGame);
 
             CurrentWord = currentWord;
-            SceneManager.LoadSceneAsync("FinishedWord", LoadSceneMode.Additive);
+
+            EndGame("FinishedWord");
         }
-        else if (!WordUI.text.Contains("_"))
+        else if (!GUI.GetWord().Contains("_"))
         {
             if (availableWords.Count <= 0)
                 WonGame();
@@ -326,8 +265,9 @@ public class GameManager : MonoBehaviour
 
                 CurrentWord = currentWord;
                 SceneManager.LoadSceneAsync("FinishedWord", LoadSceneMode.Additive);
-
-                Invoke("Reset", 2.9f);
+                GUI.SetCanvasActive(false);
+                score += currentRoundScore;
+                Invoke("Reset", 3.1f);
             }
         }
         else
@@ -338,11 +278,18 @@ public class GameManager : MonoBehaviour
 
     void WonGame()
     {
-        HighScores.AddToList(score);
+        score += currentRoundScore;
 
         if (CorrectAnswer)
-            SFXManager.Instance.PlaySFX(WinGame);
+            SFXManager.Instance.PlaySFX(CorrectAnswer);
 
-        SceneManager.LoadSceneAsync("FinishedGame", LoadSceneMode.Additive);
+        EndGame("FinishedGame");
+    }
+
+    void EndGame(string sceneName)
+    {
+        SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+        GUI.SetCanvasActive(false);
+        gameInProgress = false;
     }
 }
